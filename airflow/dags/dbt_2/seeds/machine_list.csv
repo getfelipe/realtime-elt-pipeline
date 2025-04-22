@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table "production_188f"."maintenance"."machine_list" ("machine_id" text,"machine_name" text,"factory_branch" text)
+  ;
+    -- dbt seed --
+    
+          insert into "production_188f"."maintenance"."machine_list" ("machine_id", "machine_name", "factory_branch") values
+          (%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s),(%s,%s,%s)
+      
+
+;
+  

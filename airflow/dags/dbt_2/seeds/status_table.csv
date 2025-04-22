@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table "production_188f"."maintenance"."status_table" ("status_id" integer,"status_description" text)
+  ;
+    -- dbt seed --
+    
+          insert into "production_188f"."maintenance"."status_table" ("status_id", "status_description") values
+          (%s,%s),(%s,%s),(%s,%s)
+      
+
+;
+  

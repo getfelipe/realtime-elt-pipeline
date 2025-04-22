@@ -1,0 +1,100 @@
+models:
+  - name: int_production
+    description: "Tests for production staging table"
+    columns:
+      - name: production_id
+        description: "Unique identifier for each production record"
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+      - name: units_produced
+        description: "Number of units produced"
+        tests:
+          - not_null:
+              config:
+                where: "units_produced > 0"
+                severity: warn
+
+  - name: int_status
+    description: "Tests for status staging table"
+    columns:
+      - name: status_id
+        description: "Unique identifier for each status record"
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+      - name: status_description
+        description: "Name of the status"
+        tests:
+          - not_null:
+              severity: warn
+
+  - name: int_machines
+    description: "Tests for machine staging table"
+    columns:
+      - name: machine_id
+        description: "Unique identifier for each machine"
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+      - name: machine_name
+        description: "Name of the machine"
+      - name: factory_branch
+        description: "Branch of the factory where the machine is located"
+        tests:
+          - accepted_values:
+              values: ["Plant A", "Plant B", "Plant C"]
+              severity: warn
+
+  - name: int_operators
+    description: "Tests for operator staging table"
+    columns:
+      - name: operator_id
+        description: "Unique identifier for each operator"
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+      - name: operator_name
+        description: "Name of the operator"
+
+      - name: operator_cpf
+        description: "Operator's CPF (Brazilian ID number)"
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^\d{3}\.\d{3}\.\d{3}-\d{2}$'
+              config:
+                severity: warn
+
+      - name: operator_phone
+        description: "Operator's phone number"
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+
+      - name: operator_email
+        description: "Operator's email address"
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+              config:
+                severity: warn

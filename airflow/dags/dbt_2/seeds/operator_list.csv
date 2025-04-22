@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table "production_188f"."maintenance"."operator_list" ("operator_id" text,"operator_name" text,"operator_cpf" text,"operator_phone" text,"operator_email" text)
+  ;
+    -- dbt seed --
+    
+          insert into "production_188f"."maintenance"."operator_list" ("operator_id", "operator_name", "operator_cpf", "operator_phone", "operator_email") values
+          (%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s)
+      
+
+;
+  

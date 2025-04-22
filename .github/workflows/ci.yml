@@ -1,0 +1,86 @@
+name: CI - Airflow Astro Cosmos
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "airflow/dags/**"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "airflow/dags/**"
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core dbt-postgres
+
+      - name: Set up dbt profile for dev
+        run: |
+          mkdir -p ~/.dbt
+          echo "dbt_2:
+            outputs:
+              dev:
+                dbname: $POSTGRES_DB
+                host: $POSTGRES_HOST
+                port: 5432
+                user: $POSTGRES_USER
+                password: $POSTGRES_PASSWORD
+                schema: maintenance
+                threads: 1
+                type: postgres
+            target: dev" > ~/.dbt/profiles.yml
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      #testes
+      - name: Run dbt debug
+        run: dbt debug
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt deps
+        run: dbt deps
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt ls
+        run: dbt ls
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt seed
+        run: dbt seed
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt run for staging
+        run: dbt run --select staging
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt run for intermediate
+        run: dbt run --select intermediate
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt run for marts
+        run: dbt run --select marts
+        working-directory: airflow/dags/dbt_2
+
+      - name: Run dbt test for intermediate
+        run: dbt test --select intermediate
+        working-directory: airflow/dags/dbt_2

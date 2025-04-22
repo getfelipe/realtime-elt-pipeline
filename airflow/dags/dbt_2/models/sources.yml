@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: postgres
+    schema: maintenance
+    tables:
+      - name: machine_list
+      - name: operator_list
+      - name: production_list
+      - name: status_table

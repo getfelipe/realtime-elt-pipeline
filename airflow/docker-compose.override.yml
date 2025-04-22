@@ -1,0 +1,81 @@
+services:
+  scheduler:
+    networks:
+      - airflow_kafka_network
+    volumes:
+      - ./dags/dbt_2/seeds:/opt/airflow/dags/dbt_2/seeds
+
+    ports:
+      - "9081:9081"
+  webserver:
+    networks:
+      - airflow_kafka_network
+
+  triggerer:
+    networks:
+      - airflow_kafka_network
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - airflow_kafka_network
+  kafka:
+    image: bitnami/kafka:latest
+    restart: on-failure
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+    environment:
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,DOCKER_HACK://:19092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,DOCKER_HACK://kafka:19092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - KAFKA_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,DOCKER_HACK:PLAINTEXT
+    networks:
+      - airflow_kafka_network
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "8082:8080"
+    restart: on-failure
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    networks:
+      - airflow_kafka_network
+
+  producer:
+    container_name: producer
+    build:
+      context: ./codes/
+      dockerfile: Dockerfile
+    depends_on:
+      - kafka
+      - scheduler
+    networks:
+      - airflow_kafka_network
+    volumes:
+      - ./dags/dbt_2/seeds:/opt/airflow/dags/dbt_2/seeds
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase_airflow
+    restart: "no"
+    ports:
+      - "3000:3000"
+    networks:
+      - airflow_kafka_network
+
+networks:
+  airflow_kafka_network:
+    driver: bridge
